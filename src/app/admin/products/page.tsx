@@ -42,6 +42,7 @@ async function ProductsTable() {
   });
 
   if (products.length === 0) return <p>No products found</p>;
+
   return (
     <Table>
       <TableHeader>
@@ -69,7 +70,7 @@ async function ProductsTable() {
               ) : (
                 <>
                   <span className="sr-only">Unavailable</span>
-                  <XCircle />
+                  <XCircle className="stroke-destructive" />
                 </>
               )}
             </TableCell>
@@ -88,7 +89,6 @@ async function ProductsTable() {
                       Download
                     </a>
                   </DropdownMenuItem>
-
                   <DropdownMenuItem asChild>
                     <Link href={`/admin/products/${product.id}/edit`}>Edit</Link>
                   </DropdownMenuItem>
