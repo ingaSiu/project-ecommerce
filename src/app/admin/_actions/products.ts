@@ -36,7 +36,7 @@ export async function addProduct(prevState: unknown, formData: FormData) {
   const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
   await fs.writeFile(`public${imagePath}`, Buffer.from(await data.image.arrayBuffer()));
 
-  db.product.create({
+  await db.product.create({
     data: {
       isAvailableForPurchase: false,
       name: data.name,
