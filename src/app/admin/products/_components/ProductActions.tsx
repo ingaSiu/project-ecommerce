@@ -14,14 +14,15 @@ export function ActiveToggleDropdownItem({
   isAvailableForPurchase: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   return (
     <DropdownMenuItem
       disabled={isPending}
       onClick={() => {
-        startTransition;
-        async () => {
+        startTransition(async () => {
           await toggleProductAvailability(id, !isAvailableForPurchase);
-        };
+          router.refresh();
+        });
       }}
     >
       {isAvailableForPurchase ? 'Deactivate' : 'Activate'}
@@ -37,11 +38,10 @@ export function DeleteDropdownItem({ id, disabled }: { id: string; disabled: boo
       variant="destructive"
       disabled={disabled || isPending}
       onClick={() => {
-        startTransition;
-        async () => {
+        startTransition(async () => {
           await deleteProduct(id);
           router.refresh();
-        };
+        });
       }}
     >
       Delete
