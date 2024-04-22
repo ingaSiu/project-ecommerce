@@ -1,3 +1,4 @@
+import { CheckoutForm } from './_components/CheckoutForm';
 import Stripe from 'stripe';
 import db from '@/db/db';
 import { notFound } from 'next/navigation';
@@ -18,5 +19,5 @@ export default async function Purchase({ params: { id } }: { params: { id: strin
     throw Error('Stripe failed to create payment intent');
   }
 
-  return <h1>Hello</h1>;
+  return <CheckoutForm product={product} clientSecret={paymentIntent.client_secret} />;
 }
