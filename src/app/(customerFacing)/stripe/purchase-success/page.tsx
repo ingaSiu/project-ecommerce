@@ -31,10 +31,22 @@ export default async function SuccessPage({ searchParams }: { searchParams: { pa
           <h1 className="text-2xl font-bold">{product.name}</h1>
           <div className="line-clamp-3 text-muted-foreground">{product.description}</div>
           <Button className="mt-4" size="lg" asChild>
-            {isSuccess ? <a></a> : <Link href={`/products/${product.id}/purchase`}>Try Again</Link>}
+            {isSuccess ? (
+              <a href={`/products/download/${await createDownloadVerification(product.id)}`}>Download</a>
+            ) : (
+              <Link href={`/products/${product.id}/purchase`}>Try Again</Link>
+            )}
           </Button>
         </div>
       </div>
     </div>
   );
+}
+
+async function createDownloadVerification(productId: string) {
+  return (
+    await db.downloadVerification.create({
+      data: { productId, expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24) },
+    })
+  ).id;
 }
