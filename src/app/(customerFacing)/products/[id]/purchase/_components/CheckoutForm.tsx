@@ -1,13 +1,14 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { FormEvent, useEffect, useState } from 'react';
+import { Elements, LinkAuthenticationElement, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { FormEvent, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/formatters';
 import { loadStripe } from '@stripe/stripe-js';
+import { userOrderExists } from '@/app/actions/orders';
 
 type CheckoutFormProps = {
   product: {
@@ -37,25 +38,32 @@ export function CheckoutForm({ product, clientSecret }: CheckoutFormProps) {
         </div>
       </div>
       <Elements options={{ clientSecret }} stripe={stripePromise}>
-        <Form priceInCents={product.priceInCents} />
+        <Form priceInCents={product.priceInCents} productId={product.id} />
       </Elements>
     </div>
   );
 }
 
-function Form({ priceInCents }: { priceInCents: number }) {
+function Form({ priceInCents, productId }: { priceInCents: number; productId: string }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const [email, setEmail] = useState<string>();
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (stripe == null || elements == null) return;
+    if (stripe == null || elements == null || email == null) return;
 
     setIsLoading(true);
 
-    //check for existing order
+    const orderExists = await userOrderExists(email, productId);
+
+    if (orderExists) {
+      setErrorMessage('You have already purchased this product. Try downloading it from the My orders page');
+      setIsLoading(false);
+      return;
+    }
 
     stripe
       .confirmPayment({
@@ -83,6 +91,9 @@ function Form({ priceInCents }: { priceInCents: number }) {
         </CardHeader>
         <CardContent>
           <PaymentElement />
+          <div className="mt-4">
+            <LinkAuthenticationElement onChange={(e) => setEmail(e.value.email)} />
+          </div>
         </CardContent>
         <CardFooter>
           <Button className="w-full" size="lg" disabled={stripe == null || elements == null || isLoading}>
